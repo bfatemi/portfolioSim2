@@ -1,9 +1,3 @@
-############################################################################
-# Function: RunSim - Simulate random portfolio returns over 1 year, n  times 
-#
-
-############################################################################
-
 #' A Random Walk: A One Year Simulation
 #' 
 #' A function to simulate the random walk of a portfolio/stock/instrument given
