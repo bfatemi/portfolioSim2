@@ -1,0 +1,73 @@
+---
+title: "StockPortfolio Simulation"
+author: "Bobby Fatemi"
+date: "March 27, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###Summary###
+This script will optimize a portfolio based on stocks the user provides and the fundemental theory of Portfolio Optimization (Markowitz Mean-Variance Optimization) to derive a portfolio that lands on the efficient frontier (best portfolio given a selection of stocks). Next we will calculate historical returns (**mu**) and risk (**sigma**) of our portfolio and conduct a simulation of random walks (by day, for a year) N times. 
+
+###In Steps###
+
+**STEP 1:** Get historical stock prices and calculate returns $\left(\mu_i = E(R_i)\right)$ and risk $\left(\sigma_i  = \sqrt{Variance}\right)$
+
+**STEP 2:** Calculate the weights of each stock ($w_i$) in a optimal portfolio (efficient frontier). Note that the sum of the weights of each stock in your portfolio must equal 100%:
+
+$$\sum_{i=1}^n w_i = w_1 + w_2 + ... + w_n = 1$$
+
+**STEP 3:** Calculate a *portfolio* risk and return pair
+
+$$\mu_p = \sum_{i=1}^n w_i \mu_i = \sum_{i=1}^n w_i E(R_i)$$
+
+**STEP 4:** Using (mu, sigma) conduct *N* random walks (1 step = 1 day) and average by day across all N random walks
+
+**STEP 5:** Randomly sample another (mu, sigma) from a normal distribution and do STEP 4 again, *M times*
+
+**STEP 6:** Calculate various probabilities from our portfolio simulation
+
+###Historical Average Risk-Returns for Each Stock###
+We will use the package `StockPortfolio` for a number of critical steps. Additionally, for our data wrangling and charting needs, we will use `data.table` and `googleVis`, respectively. For this, its also a good idea to turn off scientific notation for presentation of numbers.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+library(stockPortfolio)
+library(data.table)
+library(googleVis)
+options(scipen = 10000)
+```
+
+##### Define Stock Tickers and Get Returns #####
+Lets say we'd like a technology and banking heavy portfolio. Just because I'm lazy, let's also say we don't care about diversification and we'd like returns calculated on a daily basis going back 5 years: 
+
+```{r,cache=TRUE}
+tickers <- c("MSFT", "C", "BAC")
+freq    <- "day"
+start   <- Sys.Date()-365*5
+
+stockReturns <- getReturns(tickers, freq, start = start)
+```
+After feeding these inputs to the function `getReturns` from the package `StockPortfolio`, we can see that we get an object of class stockModel, which is really just a list. Let's explore it:
+
+```{r}
+stockReturns
+names(stockReturns)
+lapply(stockReturns[["full"]],head)
+```
+###Weighting each Stock to get Optimal Portfolio###
+The next step involves using your historical returns, calculating each stock's **mu** and **sigma**, then relying on the nobel winning Mordern Portfolio Theory introduced by Harry Markowitz to derive the best possible weighting of each stock in our portfolio. 
+
+#####Modern Portfolio Theory#####
+In a nutshell, the theory says that there is a set of reward-maximizing portfolios, based on the level of risk you take, that form what is known as *the efficient frontier*. Portfolios not on the efficient frontier can be replaced with a portfolio that either generate more reward for that level of risk, or generates same reward for lesser risk. 
+> It is the set of portfolios each with the feature that no other portfolio exists with a higher expected return but with the same standard deviation of return.
+
+We can use the mathematical fact that a portfolio's calculated return is simply a weighted average of the return of each stock, and similarly, a porfolio's standard deviation of returns is also linear with respect to the weights:
+
+$$E(R_p) = \sum_{i}w_iE(R_i)$$ 
+
+where R_p is the return of the portfolio, and R_i is the return on asset i. Wi is the weighting of that asset within the portfolio.
+
+\sigma^2_p = \sum 
