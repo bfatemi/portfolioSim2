@@ -2,23 +2,15 @@
 library(stockPortfolio)
 library(googleVis)
 library(data.table)
-
 options(scipen = 10000)
 
 #######################################################################
 # Efficient Portfolio Parameters
 #######################################################################
 
-# Get stock returns 
-stockReturns   <- getReturns(ticker = c("MSFT", "C", "BAC"),
-                             freq = "day",
-                             start = Sys.Date()-365*5)
+tickers <- c("MSFT", "BAC", "AAPL")
 
-# Get stock model and feed into function to get optimal weights 
-opPort_Weights <- optimalPort(stockModel(stockReturns))$X
 
-# Based on weights and historical data, get historical portfolio returns
-portReturns <- portReturn(stockModel(s), opPort_Weights)
 
 # Get historical average return and risk of portfolio
 mu  <- portReturns$R
@@ -27,37 +19,7 @@ sig <- sqrt(portReturns$V)
 # number of iterations
 n   <- 100  
 
-############################################################################
-# Function: RunSim - Simulate random portfolio returns over 1 year, n  times 
-#
-# Simulation parameters are historical mu and sigma of portfolio based on
-# historical mu and sigma of given stocks in our portfolio, weighted by 
-# markowitz fundemental theory to derive optimal weights (weights that land
-# our portfolio on the efficient frontier
-#
-# Function will average across all iteration of the simulation for a given mu and sigma,
-# so the function output will 1 year random walk of portfolio where each day's
-# generated return is actually an average of n simulations of that day.
-#
-# But we will further variate the calculated mu and sigma to account for 
-# additional risk, so we will run the function another m times
-############################################################################
 
-RunSim <- function(vec){
-  # ------------------- Random walk parameters
-  mu  <- vec[1]           # first position of input vector is mu for this run
-  sig <- vec[2]           # second pos is sig for this run
-  h   <- 1/260            # dist of each step (1year = 261 trading days)
-  s0  <- 1                # since measuring returns, start at 100%
-  
-  s <- matrix(0, n, 261)
-  s[,1] <- s0
-  
-  for(j in 2:261)
-    s[,j] <- s[,j-1]*exp((mu-.5*sig^2)*h+sig*rnorm(n)*sqrt(h))
-  
-  apply(s,2,mean)         # return day average across n sim s
-}
 
 #--------------------------------------------------------------------------
 # For the hist mu and sig of our portfolio, we will randomly  
@@ -121,7 +83,8 @@ View(dt)
 # Probability that X month will have pos return if X-1 was negative
 
 
-#store the dataframe I just created with info for the legend of my chart, and a size option
+#store the dataframe I just created with info for the legend of my chart, and a size 
+option
 Line <- gvisLineChart(dframe,xvar = colnames(dframe),
                       options=list(width=1200, 
                                    height=600,

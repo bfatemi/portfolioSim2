@@ -1,0 +1,13 @@
+Package: optimalport
+Title: What the Package Does (one line, title case)
+Version: 0.0.0.9000
+Authors@R: person("Bobby", "Fatemi", email = "Bfatemi07@gmail.com", role = c("aut", "cre"))
+Description: Building, simulating, and visualizing an optimal portfolio.
+Depends: 
+  R (>= 3.2.3),
+  stockPortfolio
+License: What license is it under?
+LazyData: true
+imports:
+  googleVis,
+  data.table
