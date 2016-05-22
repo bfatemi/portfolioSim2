@@ -9,28 +9,50 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-###Summary###
-This script will optimize a portfolio based on stocks the user provides and the fundemental theory of Portfolio Optimization (Markowitz Mean-Variance Optimization) to derive a portfolio that lands on the efficient frontier (best portfolio given a selection of stocks). Next we will calculate historical returns (**mu**) and risk (**sigma**) of our portfolio and conduct a simulation of random walks (by day, for a year) N times. 
+## Summary
 
-###In Steps###
+This package provides functions to assist with optimizing a given portfolio. The method used is known as the fundemental theory of Portfolio Optimization (_Markowitz Mean-Variance Optimization_) and it's used to construct a portfolio that lands on the _efficient frontier_ (best portfolio given a selection of stocks). 
 
-**STEP 1:** Get historical stock prices and calculate returns $\left(\mu_i = E(R_i)\right)$ and risk $\left(\sigma_i  = \sqrt{Variance}\right)$
+In the following sections, we will use \code{optimalport} to:
 
-**STEP 2:** Calculate the weights of each stock ($w_i$) in a optimal portfolio (efficient frontier). Note that the sum of the weights of each stock in your portfolio must equal 100%:
+1. Calculate historical returns (**mu**) and risk (**sigma**) of our portfolio
+2. Conduct N simulation of random walks (by day, for a year) of our portfolio using **mu** and **sigma** as inputs
+3. Conduct M random samples of **mu** and **signa** and run each as new simulation
+
+This is effectively a simulation within a simulation. What that means is we will simulate the returns of a portfolio (defined by **mu** and **sigma**), but to capture potential risk from an innacurate **mu** and **sigma** prediction, we will randomly sample those and conduct another portfolio simulation, and so on.
+
+## Details
+
+#### *Step 1: Get Data for Stocks*
+
+Get historical stock prices for given stocks and calculate returns $\left(\mu_i = E(R_i)\right)$ and risk $\left(\sigma_i  = \sqrt{Variance}\right)$
+
+#### *Step 2: Get Portfolio Weights*
+
+Calculate the weights of each stock ($w_i$) in a optimal portfolio (efficient frontier). Note that the sum of the weights of each stock in your portfolio must equal 100%:
 
 $$\sum_{i=1}^n w_i = w_1 + w_2 + ... + w_n = 1$$
 
-**STEP 3:** Calculate a *portfolio* risk and return pair
+#### *Step 3: Get Portfolio Risk and Return*
+
+Calculate a *portfolio* risk and return pair
 
 $$\mu_p = \sum_{i=1}^n w_i \mu_i = \sum_{i=1}^n w_i E(R_i)$$
 
-**STEP 4:** Using (mu, sigma) conduct *N* random walks (1 step = 1 day) and average by day across all N random walks
+#### *Step 4: Run Simulation (Part 1)*
 
-**STEP 5:** Randomly sample another (mu, sigma) from a normal distribution and do STEP 4 again, *M times*
+Using (mu, sigma) conduct *N* random walks (1 step = 1 day) and average by day across all N random walks
 
-**STEP 6:** Calculate various probabilities from our portfolio simulation
+#### *Step 5: Run Simulation (Part 2)*
 
-###Historical Average Risk-Returns for Each Stock###
+Randomly sample another (mu, sigma) from a normal distribution and do STEP 4 again, *M times*
+
+#### *Step 6: Derive Insights from Results*
+
+Calculate various probabilities from our portfolio simulation
+
+### Historical Average Risk-Returns for Each Stock
+
 We will use the package `StockPortfolio` for a number of critical steps. Additionally, for our data wrangling and charting needs, we will use `data.table` and `googleVis`, respectively. For this, its also a good idea to turn off scientific notation for presentation of numbers.
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
